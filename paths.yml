@@ -1,0 +1,26 @@
+mysql:
+  LANDING_PATH : "C:/Users/hadka/OneDrive/Desktop/Sparking_Flow/landing"
+  MIRROR_PATH : "C:/Users/hadka/OneDrive/Desktop/Sparking_Flow/mirror"
+  TEMP_PATH : "C:/Users/hadka/OneDrive/Desktop/Sparking_Flow/temp"
+  JDBC_URL : "jdbc:mysql://localhost:3307/testdb?allowPublicKeyRetrieval=true&useSSL=false"
+  JDBC_DRIVER : "com.mysql.cj.jdbc.Driver"
+  USERNAME : "user"
+  PASSWORD : "password"
+  TABLES :
+    accounts:
+      load_type: "INCREMENTAL"
+      incremental_col: "transaction_datetime"
+      columns: "cust_id,cust_name,transaction_amount,transaction_datetime"
+      primary_key: "cust_id"
+    transactions:
+      load_type: "INCREMENTAL"
+      incremental_col : "transaction_datetime"
+      columns: "cust_id,cust_name,transaction_amount,transaction_datetime"
+      primary_key : "None"
+    customers :
+      load_type : "FULL"
+      columns : "customer_id,first_name,last_name,email,country"
+      incremental_col : "None"
+      primary_key : "None"
+      query :
+        "SELECT * FROM customers"

@@ -1,0 +1,33 @@
+/project/project
+/project/target
+/.idea
+/.vscode
+/.metals
+.bsp
+/target
+/logs/
+/output/*
+/dags/__pycache__
+
+
+# Ignore virtual environment
+.venv/
+
+# Ignore environment files
+.env
+
+# Ignore system and database data folders
+mysql_data/
+mssql_data/
+data/
+__pycache__/
+
+# Ignore log and temporary files
+*.log
+*.tmp
+*.sock
+
+# Ignore IDE and OS files
+.idea/
+.vscode/
+.DS_Store

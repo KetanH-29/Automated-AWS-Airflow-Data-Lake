@@ -1,0 +1,128 @@
+def mirror_to_elasticsearch(spark, table_name):
+    """Reads final data from Mirror Parquet and indexes it into Elasticsearch."""
+
+    # 1. Define Paths and Index
+    MIRROR_PATH = f"{mysql['MIRROR_PATH']}/{table_name}"
+    ES_INDEX = f"{table_name}_snapshot"  # Example index name
+
+    # NOTE: Use the Docker service name and internal port (9200)
+    # The 'elasticsearch' service name is accessible from your host/Spark driver.
+    ES_HOSTS = "localhost:9200"
+
+    try:
+        # 2. Read the clean, final snapshot from the Mirror path
+        df_final = spark.read.format("parquet").load(f"{MIRROR_PATH}")
+
+        # 3. Write the data to Elasticsearch
+        df_final.write \
+            .format("org.elasticsearch.spark.sql") \
+            .option("es.nodes", ES_HOSTS) \
+            .option("es.resource", ES_INDEX) \
+            .option("es.nodes.wan.only", "true") \
+            .option("es.mapping.id", "cust_id") \
+            .mode("overwrite") \
+            .save()
+
+        print(f"✅ Data successfully indexed to Elasticsearch index: {ES_INDEX}")
+
+    except Exception as e:
+        print(f"❌ Elasticsearch Write Failed: {e}")
+        raise e
+
+mirror_to_elasticsearch(spark, table_name)
+
+
+
+
+
+
+import os
+import sys
+import pandas as pd
+import elasticsearch
+from elasticsearch import Elasticsearch
+
+def connect_to_elasticsearch():
+    try:
+        es = Elasticsearch(
+            ["http://localhost:9200"],  # list form is safer
+            verify_certs=False,
+            request_timeout=30
+        )
+
+        if es.ping():
+            print("✅ Elasticsearch connected successfully.")
+            return es
+        else:
+            print("❌ Elasticsearch connection failed (Ping unsuccessful).")
+            return None
+
+    except Exception as e:
+        print(f"❌ Connection attempt failed. Error: {e}")
+        return None
+
+
+if __name__ == "__main__":
+    es = connect_to_elasticsearch()
+
+
+
+
+
+
+
+from datetime import datetime
+from elasticsearch import Elasticsearch
+
+# Connect to Elasticsearch
+es = Elasticsearch("http://localhost:9200", verify_certs=False)
+
+# Define index name
+index_name = "job_logs"
+
+# Create index with proper mapping if it doesn't exist
+if not es.indices.exists(index=index_name):
+    mapping = {
+        "mappings": {
+            "properties": {
+                "sourcename": {"type": "keyword"},
+                "tablename": {"type": "keyword"},
+                "status": {"type": "keyword"},
+                "time": {"type": "date"}
+            }
+        }
+    }
+    es.indices.create(index=index_name, body=mapping)
+    print(f"✅ Index '{index_name}' created with proper mapping.")
+else:
+    print(f"ℹ️ Index '{index_name}' already exists.")
+
+# Define sample logs
+logs = [
+    {
+        "sourcename": "MySQL",
+        "tablename": "customers",
+        "status": "Job Started",
+        "time": datetime.utcnow().isoformat()  # ✅ ISO 8601 format
+    },
+    {
+        "sourcename": "MySQL",
+        "tablename": "customers",
+        "status": "Running",
+        "time": datetime.utcnow().isoformat()
+    },
+    {
+        "sourcename": "MySQL",
+        "tablename": "customers",
+        "status": "Completed",
+        "time": datetime.utcnow().isoformat()
+    }
+]
+
+# Insert documents into Elasticsearch
+for log in logs:
+    res = es.index(index=index_name, document=log)
+    print(f"✅ Inserted log with ID: {res['_id']} and status: {log['status']}")
+
+print("\n🎯 All log entries inserted successfully!")
+

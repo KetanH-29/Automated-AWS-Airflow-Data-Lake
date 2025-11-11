@@ -1,0 +1,26 @@
+mysql:
+  LANDING_PATH : "/opt/airflow/data/landing"
+  MIRROR_PATH : "/opt/airflow/data/mirror"
+  TEMP_PATH : "/opt/airflow/data/temp"
+  JDBC_URL : "jdbc:mysql://mysql:3306/testdb?allowPublicKeyRetrieval=true&useSSL=false"
+  JDBC_DRIVER : "com.mysql.cj.jdbc.Driver"
+  USERNAME : "user"
+  PASSWORD : "password"
+  TABLES :
+    accounts:
+      load_type: "INCREMENTAL"
+      incremental_col: "transaction_datetime"
+      columns: "cust_id,cust_name,transaction_amount,transaction_datetime"
+      primary_key: "cust_id"
+    transactions:
+      load_type: "INCREMENTAL"
+      incremental_col : "transaction_datetime"
+      columns: "cust_id,cust_name,transaction_amount,transaction_datetime"
+      primary_key : "None"
+    customers :
+      load_type : "FULL"
+      columns : "customer_id,first_name,last_name,email,country"
+      incremental_col : "None"
+      primary_key : "None"
+      query :
+        "SELECT * FROM customers"
