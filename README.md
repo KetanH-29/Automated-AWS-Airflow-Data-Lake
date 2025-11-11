@@ -16,7 +16,7 @@ This project automates an end-to-end ETL data pipeline using **Apache Airflow**,
 - **Apache Spark (EMR)**
 - **AWS S3**
 - **Elasticsearch**
-- **Python (Boto3)**
+- **Python (PySpark,Boto3)**
 
 ## 🏗️ Architecture
 ```plaintext
