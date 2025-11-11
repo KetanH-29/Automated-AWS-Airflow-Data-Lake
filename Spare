@@ -1,3 +1,5 @@
+#This is a spare file to edit codes
+
 def mirror_to_elasticsearch(spark, table_name):
     """Reads final data from Mirror Parquet and indexes it into Elasticsearch."""
 
